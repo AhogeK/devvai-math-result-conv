@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import HelloWorld from './components/HelloWorld.vue';
+import TextConversion from './components/TextConversion.vue';
 </script>
 
 <template>
-  <div class="flex">
+  <div class="absolute top-0 left-0 flex items-start flex-nowrap">
     <a href="https://vitejs.dev" target="_blank">
       <img alt="Vite logo" class="logo" src="/vite.svg" />
     </a>
@@ -11,7 +11,7 @@ import HelloWorld from './components/HelloWorld.vue';
       <img alt="Vue logo" class="logo vue" src="./assets/vue.svg" />
     </a>
   </div>
-  <HelloWorld msg="Vite + Vue" />
+  <TextConversion />
 </template>
 
 <style scoped>
