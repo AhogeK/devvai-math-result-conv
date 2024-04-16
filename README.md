@@ -1,13 +1,5 @@
-# Vue 3 + TypeScript + Vite
+# devv.ai 结果文本数学公式转换
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue
-3 `<script setup>` SFCs, check out
-the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
-
-## Recommended Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (
-  previously Volar) and disable Vetur
-
-- Use [vue-tsc](https://github.com/vuejs/language-tools/tree/master/packages/tsc) for performing the same type checking
-  from the command line, or for generating d.ts files for SFCs.
+> 由于devv.ai的回答文本中包含了数学公式，本可以使用LaTeX语法进行显示，但devv.ai目前并未完成该功能，为
+> 了更方便阅读包含数学公式的文本，本项目提供了一个简单的方法将devv.ai的回答文本中的数学公式转换为$$格式方便
+> 作为markdown文本显示。
