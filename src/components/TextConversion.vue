@@ -1,8 +1,15 @@
 <script lang="ts" setup>
 import { Ref, ref, watch } from 'vue';
+import remarkMath from 'remark-math';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+import rehypeKatex from 'rehype-katex';
+import rehypeStringify from 'rehype-stringify';
 
 const leftTextarea: Ref<HTMLTextAreaElement | null> = ref(null);
-const rightTextarea: Ref<HTMLTextAreaElement | null> = ref(null);
+const rightDiv: Ref<HTMLDivElement | null> = ref(null);
 
 const textareaStyle = ref([
   'w-full',
@@ -17,8 +24,24 @@ const textareaStyle = ref([
 const content = ref('');
 const result = ref('');
 
-watch(content, () => {
-  result.value = parsingTransformationContent(content.value);
+watch(content, async () => {
+  const convText = parsingTransformationContent(content.value);
+  const file = await unified()
+    .use(remarkParse)
+    .use(remarkMath)
+    .use(remarkRehype)
+    .use(rehypeSanitize, {
+      ...defaultSchema,
+      attributes: {
+        ...defaultSchema.attributes,
+        // The `language-*` regex is allowed by default.
+        code: [['className', /^language-./, 'math-inline', 'math-display']],
+      },
+    })
+    .use(rehypeKatex)
+    .use(rehypeStringify)
+    .process(convText);
+  result.value = String(file);
 });
 
 function parsingTransformationContent(content: string | null) {
@@ -50,7 +73,7 @@ function parsingTransformationContent(content: string | null) {
 
 function syncScroll(side: 'left' | 'right') {
   const left = leftTextarea.value;
-  const right = rightTextarea.value;
+  const right = rightDiv.value;
   if (side === 'left' && left && right) {
     left.scrollTop = right.scrollTop;
     left.scrollLeft = right.scrollLeft;
@@ -73,13 +96,13 @@ function syncScroll(side: 'left' | 'right') {
         @scroll="syncScroll('right')"
       ></textarea>
       <div />
-      <textarea
+      <div
         ref="rightTextarea"
-        v-model="result"
+        class="right-content"
+        v-html="result"
         :class="textareaStyle"
-        readonly
         @scroll="syncScroll('left')"
-      ></textarea>
+      ></div>
       <div />
     </div>
   </div>
@@ -97,9 +120,15 @@ function syncScroll(side: 'left' | 'right') {
   }
 }
 
-textarea[readonly] {
+[aria-hidden='true'] {
+  display: none;
+}
+
+.right-content {
   user-select: none;
   cursor: default;
   outline: none;
+  background-color: field;
+  text-align: left;
 }
 </style>
