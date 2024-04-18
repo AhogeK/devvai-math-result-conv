@@ -7,6 +7,12 @@ import remarkRehype from 'remark-rehype';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import rehypeKatex from 'rehype-katex';
 import rehypeStringify from 'rehype-stringify';
+import rehypeRaw from 'rehype-raw';
+import rehypeFormat from 'rehype-format';
+import remarkGfm from 'remark-gfm';
+import rehypeParse from 'rehype-parse';
+import rehypeRemark from 'rehype-remark';
+import remarkStringify from 'remark-stringify';
 
 const leftTextarea: Ref<HTMLTextAreaElement | null> = ref(null);
 const rightDiv: Ref<HTMLDivElement | null> = ref(null);
@@ -23,13 +29,29 @@ const textareaStyle = ref([
 
 const content = ref('');
 const result = ref('');
+const finalPastedData = ref('');
 
 watch(content, async () => {
-  const convText = parsingTransformationContent(content.value);
+  const html2Markdown = await unified()
+    .use(rehypeParse)
+    .use(rehypeRemark)
+    .use(remarkStringify)
+    .process(finalPastedData.value ? finalPastedData.value : content.value);
+
+  const removeBackslashesBeforeCharacters = (s: string) => {
+    return s.replace(/\\(_|\[)/g, '$1');
+  };
+
+  const html2MarkdownText = removeBackslashesBeforeCharacters(
+    String(html2Markdown),
+  );
+
   const file = await unified()
     .use(remarkParse)
+    .use(remarkGfm)
     .use(remarkMath)
-    .use(remarkRehype)
+    .use(remarkRehype, { allowDangerousHtml: true })
+    .use(rehypeRaw)
     .use(rehypeSanitize, {
       ...defaultSchema,
       attributes: {
@@ -39,9 +61,11 @@ watch(content, async () => {
       },
     })
     .use(rehypeKatex)
+    .use(rehypeFormat)
     .use(rehypeStringify)
-    .process(convText);
+    .process(parsingTransformationContent(html2MarkdownText));
   result.value = String(file);
+  finalPastedData.value = '';
 });
 
 function parsingTransformationContent(content: string | null) {
@@ -71,6 +95,21 @@ function parsingTransformationContent(content: string | null) {
   return content;
 }
 
+const handlePaste = (e: ClipboardEvent) => {
+  // 获取粘贴的数据
+  const clipboardData = e.clipboardData;
+  const pastedData = clipboardData?.getData('text/html');
+  const tempDiv = document.createElement('div');
+  if (!pastedData) return;
+  tempDiv.innerHTML = pastedData;
+  const allElements = tempDiv.getElementsByTagName('*');
+  for (const element of allElements) {
+    element.removeAttribute('class');
+    element.removeAttribute('style');
+  }
+  finalPastedData.value = tempDiv.innerHTML;
+};
+
 function syncScroll(side: 'left' | 'right') {
   const left = leftTextarea.value;
   const right = rightDiv.value;
@@ -85,7 +124,7 @@ function syncScroll(side: 'left' | 'right') {
 </script>
 
 <template>
-  <div class="w-full h-1/2 responsive-h">
+  <div class="w-full h-2/3 responsive-h">
     <div class="grid grid-cols-11 h-full responsive-grid">
       <div />
       <textarea
@@ -94,6 +133,7 @@ function syncScroll(side: 'left' | 'right') {
         placeholder="Enter any text..."
         v-model="content"
         @scroll="syncScroll('right')"
+        @paste="handlePaste"
       ></textarea>
       <div />
       <div
@@ -130,5 +170,9 @@ function syncScroll(side: 'left' | 'right') {
   outline: none;
   background-color: field;
   text-align: left;
+}
+
+.right-content > p:first-child {
+  margin-top: 0;
 }
 </style>
