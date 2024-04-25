@@ -7,6 +7,15 @@ ul {
   padding-left: 1rem; /* 根据需要调整缩进大小 */
 }
 
+/*最外层的ul 或 最外层的ol margin-left 1rem*/
+ul:not(li > ul) {
+  margin-left: 1rem;
+}
+
+ol:not(li > ol) {
+  margin-left: 1rem;
+}
+
 ul ul {
   list-style-type: circle;
 }
