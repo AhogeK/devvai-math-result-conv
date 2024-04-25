@@ -42,9 +42,12 @@ watch(content, async () => {
     return s.replace(/\\(_|\[)/g, '$1');
   };
 
-  const html2MarkdownText = removeBackslashesBeforeCharacters(
-    String(html2Markdown),
+  const html2MarkdownText = parsingTransformationContent(
+    removeBackslashesBeforeCharacters(String(html2Markdown)),
   );
+
+  // 在 console 输出转换后的 Markdown 文本，方便复制 markdown 文本
+  console.log(html2MarkdownText);
 
   const file = await unified()
     .use(remarkParse)
@@ -63,7 +66,7 @@ watch(content, async () => {
     .use(rehypeKatex)
     .use(rehypeFormat)
     .use(rehypeStringify)
-    .process(parsingTransformationContent(html2MarkdownText));
+    .process(html2MarkdownText);
   result.value = String(file);
   finalPastedData.value = '';
 });
