@@ -102,21 +102,18 @@ function parsingTransformationContent(content: string | null) {
     '$1$$$2$$$3',
   );
 
-  content = content.replace(
-    /(^|\s|\S)\$\s*(.+?)\s*\$(\s|$|\S)/g,
-    (_, p1, p2, p3) => {
-      // p1作为left 如果p1不是空格或换行符，那么在p1的右边加上一个空格
-      if (p1 && !/\s/.test(p1)) {
-        p1 += ' ';
-      }
-      // p3作为right 如果p3不是空格或换行符，那么在p3的左边加上一个空格
-      if (p3 && !/\s/.test(p3)) {
-        p3 = ' ' + p3;
-      }
-      p2 = p2.trim();
-      return `${p1}$${p2}$${p3}`;
-    },
-  );
+  content = content.replace(/(.?)\$([^$]+?)\$(.?)/g, (_, p1, p2, p3) => {
+    // p1作为left 如果p1不是空格或换行符，那么在p1的右边加上一个空格
+    if (p1 && !/\s/.test(p1)) {
+      p1 += ' ';
+    }
+    // p3作为right 如果p3不是空格或换行符，那么在p3的左边加上一个空格
+    if (p3 && !/\s/.test(p3)) {
+      p3 = ' ' + p3;
+    }
+    p2 = p2.trim();
+    return `${p1}$${p2}$${p3}`;
+  });
 
   return content;
 }
