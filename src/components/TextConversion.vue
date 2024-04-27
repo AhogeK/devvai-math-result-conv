@@ -67,6 +67,7 @@ watch(content, async () => {
     .use(rehypeFormat)
     .use(rehypeStringify)
     .process(html2MarkdownText);
+
   result.value = String(file);
   finalPastedData.value = '';
 });
@@ -95,23 +96,25 @@ function parsingTransformationContent(content: string | null) {
     '$1$$$3',
   );
 
-  // 新增匹配规则4: 左括号的左边有空格或中文标点，右括号的右边有空格或中文标点，左括号的右边没有空格且紧跟任何字符，右括号的左边没有空格
+  // 匹配规则4: 左括号的左边有空格或中文标点，右括号的右边有空格或中文标点，左括号的右边没有空格且紧跟任何字符，右括号的左边没有空格
   content = content.replace(
     /([\s\u3000-\u303F\uFF00-\uFFEF])\((.*?)\)([\s\u3000-\u303F\uFF00-\uFFEF])/g,
     '$1$$$2$$$3',
   );
 
-  // 新增匹配规则5: 调整两个$符号包围的公式，确保两个$紧靠的内侧没有空格，外侧必须有一个空格
   content = content.replace(
     /(^|\s|\S)\$\s*(.+?)\s*\$(\s|$|\S)/g,
     (_, p1, p2, p3) => {
-      const left = p1.match(/[\u3000-\u303F\uFF00-\uFFEF]$/)
-        ? p1
-        : p1.trim() + ' ';
-      const right = p3.match(/^[\u3000-\u303F\uFF00-\uFFEF]/)
-        ? ' ' + p3
-        : ' ' + p3.trim();
-      return `${left}$${p2}$${right}`;
+      // p1作为left 如果p1不是空格或换行符，那么在p1的右边加上一个空格
+      if (p1 && !/\s/.test(p1)) {
+        p1 += ' ';
+      }
+      // p3作为right 如果p3不是空格或换行符，那么在p3的左边加上一个空格
+      if (p3 && !/\s/.test(p3)) {
+        p3 = ' ' + p3;
+      }
+      p2 = p2.trim();
+      return `${p1}$${p2}$${p3}`;
     },
   );
 
