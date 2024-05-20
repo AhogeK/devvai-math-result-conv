@@ -170,8 +170,8 @@ function syncScroll(side: 'left' | 'right') {
       ></textarea>
       <div />
       <div
-        ref="rightTextarea"
-        class="right-content"
+        ref="rightDiv"
+        class="right-content overflow-auto"
         v-html="result"
         :class="textareaStyle"
         @scroll="syncScroll('left')"
