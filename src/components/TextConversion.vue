@@ -42,9 +42,19 @@ watch(content, async () => {
     return s.replace(/\\(_|\[)/g, '$1');
   };
 
-  const html2MarkdownText = parsingTransformationContent(
+  let html2MarkdownText = parsingTransformationContent(
     removeBackslashesBeforeCharacters(String(html2Markdown)),
   );
+
+  function optimizeCodeSection(html2MarkdownText: string) {
+    // 使用正则表达式匹配 ``` 后面跟随空格或回车符号，并确保这些符号后面有字母字符
+    const regex = /```[\s\r\n]+(?=[a-zA-Z])/g;
+    // 使用 replace 方法去掉匹配到的空格和回车符号
+    return html2MarkdownText.replace(regex, '```');
+  }
+
+  // optimize the Markdown code section
+  html2MarkdownText = optimizeCodeSection(html2MarkdownText);
 
   // 在 console 输出转换后的 Markdown 文本，方便复制 markdown 文本
   console.log(html2MarkdownText);
