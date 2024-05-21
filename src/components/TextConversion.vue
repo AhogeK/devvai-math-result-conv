@@ -32,11 +32,30 @@ const result = ref('');
 const finalPastedData = ref('');
 
 watch(content, async () => {
+  let processedContent;
+  if (finalPastedData.value) {
+    // 获取并处理内容
+    processedContent = finalPastedData.value;
+
+    // 使用正则表达式找到所有 class 为 math-display 的 div 标签
+    processedContent = processedContent.replace(
+      /<div class="math math-display">(.*?)<\/div>/gs,
+      (match, p1) => {
+        // 检查内容是否以小括号或中括号开头
+        if (!/^[\[\(]/.test(p1.trim())) {
+          // 如果不是，则用中括号包起来
+          return `<div class="math math-display">[ ${p1.trim()} ]</div>`;
+        }
+        return match;
+      },
+    );
+  }
+
   const html2Markdown = await unified()
     .use(rehypeParse)
     .use(rehypeRemark)
     .use(remarkStringify)
-    .process(finalPastedData.value ? finalPastedData.value : content.value);
+    .process(processedContent || content.value);
 
   const removeBackslashesBeforeCharacters = (s: string) => {
     return s.replace(/\\(_|\[)/g, '$1');
@@ -137,7 +156,7 @@ const handlePaste = (e: ClipboardEvent) => {
   tempDiv.innerHTML = pastedData;
   const allElements = tempDiv.getElementsByTagName('*');
   for (const element of allElements) {
-    element.removeAttribute('class');
+    // element.removeAttribute('class');
     element.removeAttribute('style');
   }
   finalPastedData.value = tempDiv.innerHTML;
