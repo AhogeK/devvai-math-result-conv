@@ -156,7 +156,7 @@ const handlePaste = (e: ClipboardEvent) => {
   tempDiv.innerHTML = pastedData;
   const allElements = tempDiv.getElementsByTagName('*');
   for (const element of allElements) {
-    // element.removeAttribute('class');
+    // 不删除 class 因为包含特殊 class 需要进行判定 element.removeAttribute('class');
     element.removeAttribute('style');
   }
   finalPastedData.value = tempDiv.innerHTML;
