@@ -121,7 +121,7 @@ function parsingTransformationContent(content: string | null) {
 
   // 匹配规则3: 右边紧邻中文标点但左边有空格的小括号或中括号
   content = content.replace(
-    /(\s)([\(\)\[\]])([\u3000-\u303F\uFF00-\uFFEF])/g,
+    /(\s)([\(\)\[\]])([\u3000-\u303F\uFF00-\uFFEF*])/g,
     '$1$$$3',
   );
 
@@ -143,6 +143,7 @@ function parsingTransformationContent(content: string | null) {
     p2 = p2.trim();
     return `${p1}$${p2}$${p3}`;
   });
+  content = content.replace(/\$ \*/g, '$*');
 
   return content;
 }
